@@ -7,7 +7,7 @@ export class MemberService {
     constructor() {
         this.repository = new MemberRepository();
     }
-//createMember
+//createMember 3
     async createMember(memberData: Partial<Member>): Promise<Member> {
         // Validate required fields
         if (!memberData.firstName || !memberData.lastName || !memberData.email) {

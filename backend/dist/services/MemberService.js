@@ -15,6 +15,7 @@ class MemberService {
     constructor() {
         this.repository = new MemberRepository_1.MemberRepository();
     }
+    //createMember 3
     createMember(memberData) {
         return __awaiter(this, void 0, void 0, function* () {
             // Validate required fields

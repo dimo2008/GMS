@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, Router } from "express";
 import { MemberService } from "../services/MemberService";
 
 export class MemberController {
@@ -165,3 +165,17 @@ export class MemberController {
         }
     }
 }
+
+// Export an Express Router that wires the controller methods to routes
+export const MemberRouter = (() => {
+    const controller = new MemberController();
+    const router = Router();
+
+    router.post("/", (req, res) => controller.create(req, res));
+    router.get("/", (req, res) => controller.getAll(req, res));
+    router.get("/:id", (req, res) => controller.getById(req, res));
+    router.put("/:id", (req, res) => controller.update(req, res));
+    router.delete("/:id", (req, res) => controller.delete(req, res));
+
+    return router;
+})();

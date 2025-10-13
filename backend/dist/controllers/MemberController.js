@@ -9,7 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MemberController = void 0;
+exports.MemberRouter = exports.MemberController = void 0;
+const express_1 = require("express");
 const MemberService_1 = require("../services/MemberService");
 class MemberController {
     constructor() {
@@ -186,3 +187,14 @@ class MemberController {
     }
 }
 exports.MemberController = MemberController;
+// Export an Express Router that wires the controller methods to routes
+exports.MemberRouter = (() => {
+    const controller = new MemberController();
+    const router = (0, express_1.Router)();
+    router.post("/", (req, res) => controller.create(req, res));
+    router.get("/", (req, res) => controller.getAll(req, res));
+    router.get("/:id", (req, res) => controller.getById(req, res));
+    router.put("/:id", (req, res) => controller.update(req, res));
+    router.delete("/:id", (req, res) => controller.delete(req, res));
+    return router;
+})();

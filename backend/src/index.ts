@@ -3,7 +3,7 @@ import cors from "cors";
 import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import { AppDataSource } from "./config/database";
-import { MemberController } from "./controllers/MemberController";
+import { MemberController, MemberRouter } from "./controllers/MemberController";
 
 const app = express();
 app.use(express.json());
@@ -54,11 +54,7 @@ const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Member routes
-app.post("/api/members", (req, res) => memberController.create(req, res));
-app.get("/api/members", (req, res) => memberController.getAll(req, res));
-app.get("/api/members/:id", (req, res) => memberController.getById(req, res));
-app.put("/api/members/:id", (req, res) => memberController.update(req, res));
-app.delete("/api/members/:id", (req, res) => memberController.delete(req, res));
+app.use("/api/members", MemberRouter);
 
 // Initialize database connection
 AppDataSource.initialize()

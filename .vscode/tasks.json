@@ -25,5 +25,12 @@
       "command": "cd backend && npm start",
       "group": "none"
     }
+    ,
+    {
+      "label": "clean & rebuild",
+      "type": "shell",
+  "command": "cd backend; Remove-Item -Recurse -Force .\\dist, .\\node_modules; npm install; npm run build",
+      "group": "build"
+    }
   ]
 }

@@ -33,7 +33,7 @@ const swaggerOptions = {
         info: {
             title: "Gym Management System API",
             version: "1.0.0",
-            description: "API documentation for GMSs"
+            description: "API documentation for GMS"
         },
         tags: [
             { name: 'Members', description: 'Member management endpoints' },
@@ -89,7 +89,41 @@ const swaggerOptions = {
     apis: ["./src/controllers/*.ts"]
 };
 const swaggerDocs = (0, swagger_jsdoc_1.default)(swaggerOptions);
-app.use("/api-docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerDocs));
+const customCss = `
+#download-openapi-btn {
+    background: #005a9e;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 16px;
+    margin-bottom: 16px;
+    cursor: pointer;
+}
+`;
+const customJs = `
+window.onload = function() {
+    var btn = document.createElement('button');
+    btn.id = 'download-openapi-btn';
+    btn.innerText = 'Download OpenAPI JSON';
+    btn.onclick = function() {
+        window.open('/api-docs/openapi.json', '_blank');
+    };
+    var container = document.querySelector('.swagger-ui');
+    if (container) {
+        container.insertBefore(btn, container.firstChild);
+    }
+};
+`;
+app.use("/api-docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerDocs, {
+    customCss,
+    customJs
+}));
+// Export OpenAPI spec for Postman import
+app.get("/api-docs/openapi.json", (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerDocs);
+});
 // Member routes
 app.use("/api/members", MemberController_1.MemberRouter);
 // User routes

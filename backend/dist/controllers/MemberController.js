@@ -8,10 +8,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MemberRouter = exports.MemberController = void 0;
 const express_1 = require("express");
 const MemberService_1 = require("../services/MemberService");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+// JWT auth middleware
+function jwtAuth(req, res, next) {
+    const authHeader = req.headers["authorization"];
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ message: "Missing or invalid Authorization header" });
+    }
+    const token = authHeader.slice(7);
+    try {
+        const secret = process.env.JWT_SECRET || "CHANGE_ME_TO_SECRET_IN_PROD";
+        const payload = jsonwebtoken_1.default.verify(token, secret);
+        req.user = payload;
+        next();
+    }
+    catch (err) {
+        return res.status(401).json({ message: "Invalid or expired token" });
+    }
+}
 class MemberController {
     constructor() {
         this.service = new MemberService_1.MemberService();
@@ -191,7 +212,8 @@ exports.MemberController = MemberController;
 exports.MemberRouter = (() => {
     const controller = new MemberController();
     const router = (0, express_1.Router)();
-    router.post("/", (req, res) => controller.create(req, res));
+    // Require JWT for creating a member
+    router.post("/", jwtAuth, (req, res) => controller.create(req, res));
     router.get("/", (req, res) => controller.getAll(req, res));
     router.get("/:id", (req, res) => controller.getById(req, res));
     router.put("/:id", (req, res) => controller.update(req, res));

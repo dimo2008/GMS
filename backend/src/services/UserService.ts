@@ -144,4 +144,42 @@ export class UserService {
                 // update user roles
                 return await this.repository.update(userId, { roles });
             }
+
+            async grantRoleToUser(userId: string, roleName: string): Promise<User | null> {
+                if (!userId) throw new Error('User id is required');
+                if (!roleName) throw new Error('Role name is required');
+                const user = await this.repository.findById(userId);
+                if (!user) throw new Error('User not found');
+
+                let role = await this.roleRepo.findByName(roleName);
+                if (!role) role = await this.roleRepo.create({ name: roleName });
+
+                await this.repository.addRoleToUser(userId, role.id);
+                return await this.repository.findById(userId);
+            }
+
+            async revokeRoleFromUser(userId: string, roleName: string): Promise<User | null> {
+                if (!userId) throw new Error('User id is required');
+                if (!roleName) throw new Error('Role name is required');
+                const user = await this.repository.findById(userId);
+                if (!user) throw new Error('User not found');
+
+                const role = await this.roleRepo.findByName(roleName);
+                if (!role) throw new Error('Role not found');
+
+                await this.repository.removeRoleFromUser(userId, role.id);
+                return await this.repository.findById(userId);
+            }
+
+            async userHasRole(userId: string, roleName: string): Promise<boolean> {
+                if (!userId) throw new Error('User id is required');
+                if (!roleName) throw new Error('Role name is required');
+                const user = await this.repository.findById(userId);
+                if (!user) throw new Error('User not found');
+
+                const role = await this.roleRepo.findByName(roleName);
+                if (!role) return false;
+
+                return await this.repository.userHasRole(userId, role.id);
+            }
         }

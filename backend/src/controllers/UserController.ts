@@ -224,6 +224,137 @@ export class UserController {
             res.status(500).json({ message: error.message || 'Error assigning roles', error });
         }
     }
+
+    async grantRole(req: Request, res: Response): Promise<void> {
+        try {
+            const { role } = req.body;
+            if (!role) {
+                res.status(400).json({ message: 'role is required in body' });
+                return;
+            }
+            const user = await this.service.grantRoleToUser(req.params.id, role);
+            if (user) res.json(user);
+            else res.status(404).json({ message: 'User not found' });
+        } catch (error: any) {
+            res.status(500).json({ message: error.message || 'Error granting role', error });
+        }
+    }
+
+    /**
+     * @swagger
+     * /api/users/{id}/roles/grant:
+     *   post:
+     *     summary: Grant a role to a user
+     *     tags: [Users]
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         schema:
+     *           type: string
+     *         required: true
+     *         description: User ID
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               role:
+     *                 type: string
+     *                 description: Role name to grant (e.g. admin)
+     *     responses:
+     *       200:
+     *         description: Updated user object
+     */
+
+    async revokeRole(req: Request, res: Response): Promise<void> {
+        try {
+            const { role } = req.body;
+            if (!role) {
+                res.status(400).json({ message: 'role is required in body' });
+                return;
+            }
+            const user = await this.service.revokeRoleFromUser(req.params.id, role);
+            if (user) res.json(user);
+            else res.status(404).json({ message: 'User not found' });
+        } catch (error: any) {
+            res.status(500).json({ message: error.message || 'Error revoking role', error });
+        }
+    }
+
+    /**
+     * @swagger
+     * /api/users/{id}/roles/revoke:
+     *   post:
+     *     summary: Revoke a role from a user
+     *     tags: [Users]
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         schema:
+     *           type: string
+     *         required: true
+     *         description: User ID
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               role:
+     *                 type: string
+     *                 description: Role name to revoke (e.g. admin)
+     *     responses:
+     *       200:
+     *         description: Updated user object
+     */
+
+    async hasRole(req: Request, res: Response): Promise<void> {
+        try {
+            const roleName = req.params.roleName;
+            if (!roleName) {
+                res.status(400).json({ message: 'roleName is required in path' });
+                return;
+            }
+            const has = await this.service.userHasRole(req.params.id, roleName);
+            res.json({ hasRole: has });
+        } catch (error: any) {
+            res.status(500).json({ message: error.message || 'Error checking role', error });
+        }
+    }
+
+    /**
+     * @swagger
+     * /api/users/{id}/roles/{roleName}:
+     *   get:
+     *     summary: Check if a user has a specific role
+     *     tags: [Users]
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         schema:
+     *           type: string
+     *         required: true
+     *         description: User ID
+     *       - in: path
+     *         name: roleName
+     *         schema:
+     *           type: string
+     *         required: true
+     *         description: Role name to check
+     *     responses:
+     *       200:
+     *         description: Returns whether the user has the role
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 hasRole:
+     *                   type: boolean
+     */
 }
 
 export const UserRouter = (() => {
@@ -236,6 +367,9 @@ export const UserRouter = (() => {
     router.put('/:id', (req, res) => controller.update(req, res));
 
     router.put('/:id/roles', (req, res) => controller.assignRoles(req, res));
+    router.post('/:id/roles/grant', (req, res) => controller.grantRole(req, res));
+    router.post('/:id/roles/revoke', (req, res) => controller.revokeRole(req, res));
+    router.get('/:id/roles/:roleName', (req, res) => controller.hasRole(req, res));
     router.delete('/:id', (req, res) => controller.delete(req, res));
 
     return router;

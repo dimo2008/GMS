@@ -147,4 +147,20 @@ export class UserRepository {
             };
         });
     }
+
+    async addRoleToUser(userId: string, roleId: string): Promise<void> {
+        await this.pool.query(
+            'INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+            [userId, roleId]
+        );
+    }
+
+    async removeRoleFromUser(userId: string, roleId: string): Promise<void> {
+        await this.pool.query('DELETE FROM user_roles WHERE user_id = $1 AND role_id = $2', [userId, roleId]);
+    }
+
+    async userHasRole(userId: string, roleId: string): Promise<boolean> {
+        const result = await this.pool.query('SELECT 1 FROM user_roles WHERE user_id = $1 AND role_id = $2', [userId, roleId]);
+        return !!(result && result.rowCount && result.rowCount > 0);
+    }
 }

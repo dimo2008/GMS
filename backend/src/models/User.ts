@@ -6,6 +6,8 @@ export class User {
     username!: string;
     // store hashed password
     passwordHash!: string;
+    // reference to roles.id (UUID)
+    roleId?: string;
     createdAt?: Date;
     updatedAt?: Date;
 }

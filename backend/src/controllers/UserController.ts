@@ -41,6 +41,9 @@ export class UserController {
      *                 type: string
      *               password:
      *                 type: string
+    *               role:
+    *                 type: string
+    *                 enum: [admin, receptionist]
      *     responses:
      *       201:
      *         description: User created
@@ -147,6 +150,9 @@ export class UserController {
      *                 type: string
      *               password:
      *                 type: string
+    *               role:
+    *                 type: string
+    *                 enum: [admin, receptionist]
      *     responses:
      *       200:
      *         description: Updated user object

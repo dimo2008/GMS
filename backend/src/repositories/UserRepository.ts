@@ -21,6 +21,7 @@ export class UserRepository {
                 last_name,
                 email,
                 username,
+                role_id,
                 password_hash
             ) VALUES ($1, $2, $3, $4, $5)
             RETURNING *`;
@@ -30,6 +31,8 @@ export class UserRepository {
             user.lastName,
             user.email,
             user.username,
+            // roleId may be provided in the user object
+            user.roleId || null,
             user.passwordHash
         ];
 
@@ -66,6 +69,7 @@ export class UserRepository {
         if (user.lastName) { fields.push(`last_name = $${paramCount++}`); values.push(user.lastName); }
         if (user.email) { fields.push(`email = $${paramCount++}`); values.push(user.email); }
         if (user.username) { fields.push(`username = $${paramCount++}`); values.push(user.username); }
+    if (user.roleId) { fields.push(`role_id = $${paramCount++}`); values.push(user.roleId); }
         if (user.passwordHash) { fields.push(`password_hash = $${paramCount++}`); values.push(user.passwordHash); }
 
         if (fields.length === 0) return null;
@@ -92,6 +96,7 @@ export class UserRepository {
         u.lastName = row.last_name;
         u.email = row.email;
         u.username = row.username;
+    u.roleId = row.role_id;
         u.passwordHash = row.password_hash;
         u.createdAt = row.created_at;
         u.updatedAt = row.updated_at;

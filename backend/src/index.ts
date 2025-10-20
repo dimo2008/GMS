@@ -5,9 +5,12 @@ import swaggerUi from "swagger-ui-express";
 import { AppDataSource } from "./config/database";
 import { up as membersUp } from "./migrations/1696600000000-CreateMembersTable";
 import { up as usersUp } from "./migrations/1696700000000-CreateUsersTable";
+import { up as addUserRoleUp } from "./migrations/1696800000000-AddUserRoleColumn";
+import { up as createRolesLinkUp } from "./migrations/1696900000000-CreateRolesAndLinkToUsers";
 import { MemberController, MemberRouter } from "./controllers/MemberController";
 import { UserRouter } from "./controllers/UserController";
 import { AuthRouter } from "./controllers/AuthController";
+import { RoleRouter } from "./controllers/RoleController";
 
 const app = express();
 app.use(express.json());
@@ -27,7 +30,8 @@ const swaggerOptions = {
         tags: [
             { name: 'Members', description: 'Member management endpoints' },
             { name: 'Users', description: 'User management and accounts' },
-            { name: 'Auth', description: 'Authentication endpoints' }
+            { name: 'Auth', description: 'Authentication endpoints' },
+            { name: 'Roles', description: 'Role management endpoints' }
         ],
         servers: [
             {
@@ -63,6 +67,15 @@ const swaggerOptions = {
                         username: { type: "string" },
                         createdAt: { type: "string", format: "date-time" },
                         updatedAt: { type: "string", format: "date-time" }
+                    }
+                },
+                Role: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'string', format: 'uuid' },
+                        name: { type: 'string' },
+                        createdAt: { type: 'string', format: 'date-time' },
+                        updatedAt: { type: 'string', format: 'date-time' }
                     }
                 },
                 AuthResponse: {
@@ -125,6 +138,8 @@ app.use("/api/members", MemberRouter);
 app.use("/api/users", UserRouter);
 // Auth routes
 app.use("/api/auth", AuthRouter);
+// Role routes
+app.use("/api/roles", RoleRouter);
 
 // Initialize database connection
 async function startServer() {
@@ -133,6 +148,14 @@ async function startServer() {
     console.log("Running migrations...");
     await membersUp();
     await usersUp();
+    // role-related migrations: add role column (if needed) and create roles table + link users
+    try {
+        await addUserRoleUp();
+        await createRolesLinkUp();
+    } catch (err) {
+        // log and continue (migrations may be idempotent); if you prefer to fail startup, rethrow
+        console.log('Role migrations encountered an issue (continuing startup):', err);
+    }
         await AppDataSource.initialize();
         console.log("Database connection initialized");
         const port = process.env.PORT || 3000;

@@ -23,6 +23,7 @@ export async function up(): Promise<void> {
                 last_name VARCHAR(100) NOT NULL,
                 email VARCHAR(255) NOT NULL UNIQUE,
                 username VARCHAR(100) NOT NULL UNIQUE,
+                role VARCHAR(50) NOT NULL DEFAULT 'receptionist',
                 password_hash VARCHAR(255) NOT NULL,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -44,6 +45,10 @@ export async function up(): Promise<void> {
                 BEFORE UPDATE ON users
                 FOR EACH ROW
                 EXECUTE FUNCTION update_updated_at_column();
+
+            -- enforce allowed roles (simple check constraint)
+            ALTER TABLE users
+            ADD CONSTRAINT users_role_check CHECK (role IN ('admin', 'receptionist'));
         `);
 
         console.log('Users migration up completed');

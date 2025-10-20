@@ -1,12 +1,15 @@
 import { User } from "../models/User";
 import { UserRepository } from "../repositories/UserRepository";
+import { RoleRepository } from "../repositories/RoleRepository";
 import bcrypt from 'bcryptjs';
 
 export class UserService {
     private repository: UserRepository;
+    private roleRepo: RoleRepository;
 
     constructor() {
         this.repository = new UserRepository();
+        this.roleRepo = new RoleRepository();
     }
 
     async createUser(data: Partial<User>): Promise<User> {
@@ -25,11 +28,23 @@ export class UserService {
     const plainPassword = (data as any).password as string;
     const hash = await bcrypt.hash(plainPassword, 10);
 
+        // handle role by name -> roleId
+        const allowedRoles = ['admin', 'receptionist'];
+        const roleName = (data as any).role ? String((data as any).role) : 'receptionist';
+        if (!allowedRoles.includes(roleName)) throw new Error(`Invalid role. Allowed: ${allowedRoles.join(', ')}`);
+
+        // find or create role record
+        let roleRecord = await this.roleRepo.findByName(roleName);
+        if (!roleRecord) {
+            roleRecord = await this.roleRepo.create({ name: roleName });
+        }
+
         const toCreate: Partial<User> = {
             firstName: data.firstName,
             lastName: data.lastName,
             email: data.email,
             username: data.username,
+            roleId: roleRecord.id,
             passwordHash: hash
         };
 
@@ -64,6 +79,17 @@ export class UserService {
         if ((data as any).password) {
             (data as any).passwordHash = await bcrypt.hash((data as any).password, 10);
             delete (data as any).password;
+        }
+
+        // if role provided, validate and translate to roleId
+        if ((data as any).role) {
+            const roleNameUpdate = String((data as any).role);
+            const allowedRolesUpdate = ['admin', 'receptionist'];
+            if (!allowedRolesUpdate.includes(roleNameUpdate)) throw new Error(`Invalid role. Allowed: ${allowedRolesUpdate.join(', ')}`);
+            let rr = await this.roleRepo.findByName(roleNameUpdate);
+            if (!rr) rr = await this.roleRepo.create({ name: roleNameUpdate });
+            (data as any).roleId = rr.id;
+            delete (data as any).role;
         }
 
         return await this.repository.update(id, data);

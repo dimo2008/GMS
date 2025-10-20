@@ -1,3 +1,4 @@
+import { Role } from "./Role";
 export class User {
     id!: string;
     firstName!: string;
@@ -6,8 +7,8 @@ export class User {
     username!: string;
     // store hashed password
     passwordHash!: string;
-    // reference to roles.id (UUID)
-    roleId?: string;
+    // multiple roles
+    roles?: Role[];
     createdAt?: Date;
     updatedAt?: Date;
 }

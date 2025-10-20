@@ -7,6 +7,8 @@ import { up as membersUp } from "./migrations/1696600000000-CreateMembersTable";
 import { up as usersUp } from "./migrations/1696700000000-CreateUsersTable";
 import { up as createRolesTableUp } from "./migrations/1696900000000-CreateRolesTable";
 import { up as addRoleIdToUsersUp } from "./migrations/1697000000000-AddRoleIdToUsers";
+import { up as createUserRolesTableUp } from "./migrations/1697100000000-CreateUserRolesTable";
+import { up as removeRoleIdFromUsersUp } from "./migrations/1697200000000-RemoveRoleIdFromUsers";
 import { MemberController, MemberRouter } from "./controllers/MemberController";
 import { UserRouter } from "./controllers/UserController";
 import { AuthRouter } from "./controllers/AuthController";
@@ -146,10 +148,13 @@ async function startServer() {
     try {
     // Run all migration up functions
     console.log("Running migrations...");
-    // Create users first, then roles, then add role_id to users, then members (members references users)
+    // Create users first, then roles, then add role_id to users, create user_roles, remove role_id (if desired), then members (members references users)
     await usersUp();
     await createRolesTableUp();
     await addRoleIdToUsersUp();
+    await createUserRolesTableUp();
+    // New migration: remove role_id from users (drops FK and column)
+    await removeRoleIdFromUsersUp();
     await membersUp();
         await AppDataSource.initialize();
         console.log("Database connection initialized");

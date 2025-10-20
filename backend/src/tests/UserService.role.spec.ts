@@ -25,11 +25,12 @@ describe('UserService (role handling)', () => {
         } as any;
 
         const created = await service.createUser(data);
-    expect(created).toBeDefined();
-    expect(created.roleId).toBeDefined();
-    const r = await roleRepo.findById(created.roleId!);
-    expect(r).not.toBeNull();
-    expect(r!.name).toBe('admin');
+        expect(created).toBeDefined();
+        expect(created.roles).toBeDefined();
+        expect(Array.isArray(created.roles)).toBe(true);
+        expect(created.roles!.length).toBeGreaterThan(0);
+        const roleNames = created.roles!.map(r => r.name);
+        expect(roleNames).toContain('admin');
     });
 
     it('should default role to receptionist when omitted', async () => {
@@ -42,11 +43,12 @@ describe('UserService (role handling)', () => {
         } as any;
 
         const created = await service.createUser(data);
-    expect(created).toBeDefined();
-    expect(created.roleId).toBeDefined();
-    const r = await roleRepo.findById(created.roleId!);
-    expect(r).not.toBeNull();
-    expect(r!.name).toBe('receptionist');
+        expect(created).toBeDefined();
+        expect(created.roles).toBeDefined();
+        expect(Array.isArray(created.roles)).toBe(true);
+        expect(created.roles!.length).toBeGreaterThan(0);
+        const roleNames = created.roles!.map(r => r.name);
+        expect(roleNames).toContain('receptionist');
     });
 
     it('should reject invalid role', async () => {

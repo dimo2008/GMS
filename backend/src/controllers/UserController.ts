@@ -172,6 +172,58 @@ export class UserController {
             res.status(500).json({ message: error.message || 'Error deleting user', error });
         }
     }
+
+    /**
+     * @swagger
+     * /api/users/{id}/roles:
+     *   put:
+     *     summary: Assign multiple roles to a user
+     *     tags: [Users]
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         schema:
+     *           type: string
+     *         required: true
+     *         description: User ID
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               roles:
+     *                 type: array
+     *                 items:
+     *                   type: string
+     *                 description: Array of role names (admin, receptionist)
+     *     responses:
+     *       200:
+     *         description: Updated user object with assigned roles
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/User'
+     *       400:
+     *         description: Invalid input
+     *       404:
+     *         description: User not found
+     */
+    async assignRoles(req: Request, res: Response): Promise<void> {
+        try {
+            const { roles } = req.body;
+            if (!Array.isArray(roles) || roles.length === 0) {
+                res.status(400).json({ message: 'roles must be a non-empty array of role names' });
+                return;
+            }
+            const user = await this.service.assignRolesToUser(req.params.id, roles);
+            if (user) res.json(user);
+            else res.status(404).json({ message: 'User not found' });
+        } catch (error: any) {
+            res.status(500).json({ message: error.message || 'Error assigning roles', error });
+        }
+    }
 }
 
 export const UserRouter = (() => {
@@ -182,6 +234,8 @@ export const UserRouter = (() => {
     router.get('/', (req, res) => controller.getAll(req, res));
     router.get('/:id', (req, res) => controller.getById(req, res));
     router.put('/:id', (req, res) => controller.update(req, res));
+
+    router.put('/:id/roles', (req, res) => controller.assignRoles(req, res));
     router.delete('/:id', (req, res) => controller.delete(req, res));
 
     return router;

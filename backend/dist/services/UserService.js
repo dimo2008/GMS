@@ -14,10 +14,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserService = void 0;
 const UserRepository_1 = require("../repositories/UserRepository");
+const RoleRepository_1 = require("../repositories/RoleRepository");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 class UserService {
     constructor() {
         this.repository = new UserRepository_1.UserRepository();
+        this.roleRepo = new RoleRepository_1.RoleRepository();
     }
     createUser(data) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -35,11 +37,22 @@ class UserService {
             // hash password (expect plain `password` in the request)
             const plainPassword = data.password;
             const hash = yield bcryptjs_1.default.hash(plainPassword, 10);
+            // handle role by name -> roleId
+            const allowedRoles = ['admin', 'receptionist'];
+            const roleName = data.role ? String(data.role) : 'receptionist';
+            if (!allowedRoles.includes(roleName))
+                throw new Error(`Invalid role. Allowed: ${allowedRoles.join(', ')}`);
+            // find or create role record
+            let roleRecord = yield this.roleRepo.findByName(roleName);
+            if (!roleRecord) {
+                roleRecord = yield this.roleRepo.create({ name: roleName });
+            }
             const toCreate = {
                 firstName: data.firstName,
                 lastName: data.lastName,
                 email: data.email,
                 username: data.username,
+                roleId: roleRecord.id,
                 passwordHash: hash
             };
             return yield this.repository.create(toCreate);
@@ -78,6 +91,18 @@ class UserService {
             if (data.password) {
                 data.passwordHash = yield bcryptjs_1.default.hash(data.password, 10);
                 delete data.password;
+            }
+            // if role provided, validate and translate to roleId
+            if (data.role) {
+                const roleNameUpdate = String(data.role);
+                const allowedRolesUpdate = ['admin', 'receptionist'];
+                if (!allowedRolesUpdate.includes(roleNameUpdate))
+                    throw new Error(`Invalid role. Allowed: ${allowedRolesUpdate.join(', ')}`);
+                let rr = yield this.roleRepo.findByName(roleNameUpdate);
+                if (!rr)
+                    rr = yield this.roleRepo.create({ name: roleNameUpdate });
+                data.roleId = rr.id;
+                delete data.role;
             }
             return yield this.repository.update(id, data);
         });

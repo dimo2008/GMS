@@ -5,8 +5,8 @@ import swaggerUi from "swagger-ui-express";
 import { AppDataSource } from "./config/database";
 import { up as membersUp } from "./migrations/1696600000000-CreateMembersTable";
 import { up as usersUp } from "./migrations/1696700000000-CreateUsersTable";
-import { up as addUserRoleUp } from "./migrations/1696800000000-AddUserRoleColumn";
-import { up as createRolesLinkUp } from "./migrations/1696900000000-CreateRolesAndLinkToUsers";
+import { up as createRolesTableUp } from "./migrations/1696900000000-CreateRolesTable";
+import { up as addRoleIdToUsersUp } from "./migrations/1697000000000-AddRoleIdToUsers";
 import { MemberController, MemberRouter } from "./controllers/MemberController";
 import { UserRouter } from "./controllers/UserController";
 import { AuthRouter } from "./controllers/AuthController";
@@ -146,16 +146,11 @@ async function startServer() {
     try {
     // Run all migration up functions
     console.log("Running migrations...");
-    await membersUp();
+    // Create users first, then roles, then add role_id to users, then members (members references users)
     await usersUp();
-    // role-related migrations: add role column (if needed) and create roles table + link users
-    try {
-        await addUserRoleUp();
-        await createRolesLinkUp();
-    } catch (err) {
-        // log and continue (migrations may be idempotent); if you prefer to fail startup, rethrow
-        console.log('Role migrations encountered an issue (continuing startup):', err);
-    }
+    await createRolesTableUp();
+    await addRoleIdToUsersUp();
+    await membersUp();
         await AppDataSource.initialize();
         console.log("Database connection initialized");
         const port = process.env.PORT || 3000;

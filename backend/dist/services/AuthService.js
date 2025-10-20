@@ -14,11 +14,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const UserRepository_1 = require("../repositories/UserRepository");
+const RoleRepository_1 = require("../repositories/RoleRepository");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 class AuthService {
     constructor() {
         this.repo = new UserRepository_1.UserRepository();
+        this.roleRepo = new RoleRepository_1.RoleRepository();
     }
     authenticate(identifier, password) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -31,7 +33,13 @@ class AuthService {
             const valid = yield bcryptjs_1.default.compare(password, user.passwordHash);
             if (!valid)
                 throw new Error('Invalid credentials');
-            const payload = { sub: user.id, username: user.username };
+            // resolve role name from roleId
+            let roleName = null;
+            if (user.roleId) {
+                const r = yield this.roleRepo.findById(user.roleId);
+                roleName = r ? r.name : null;
+            }
+            const payload = { sub: user.id, username: user.username, role: roleName };
             const secret = process.env.JWT_SECRET || 'CHANGE_ME_TO_SECRET_IN_PROD';
             const token = jsonwebtoken_1.default.sign(payload, secret, { expiresIn: '1h' });
             // return sanitized user and token
@@ -41,6 +49,7 @@ class AuthService {
                 lastName: user.lastName,
                 email: user.email,
                 username: user.username,
+                role: roleName,
                 createdAt: user.createdAt,
                 updatedAt: user.updatedAt
             };

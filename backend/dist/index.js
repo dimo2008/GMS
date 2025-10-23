@@ -19,9 +19,14 @@ const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const database_1 = require("./config/database");
 const _1696600000000_CreateMembersTable_1 = require("./migrations/1696600000000-CreateMembersTable");
 const _1696700000000_CreateUsersTable_1 = require("./migrations/1696700000000-CreateUsersTable");
+const _1696900000000_CreateRolesTable_1 = require("./migrations/1696900000000-CreateRolesTable");
+const _1697000000000_AddRoleIdToUsers_1 = require("./migrations/1697000000000-AddRoleIdToUsers");
+const _1697100000000_CreateUserRolesTable_1 = require("./migrations/1697100000000-CreateUserRolesTable");
+const _1697200000000_RemoveRoleIdFromUsers_1 = require("./migrations/1697200000000-RemoveRoleIdFromUsers");
 const MemberController_1 = require("./controllers/MemberController");
 const UserController_1 = require("./controllers/UserController");
 const AuthController_1 = require("./controllers/AuthController");
+const RoleController_1 = require("./controllers/RoleController");
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use((0, cors_1.default)());
@@ -38,7 +43,8 @@ const swaggerOptions = {
         tags: [
             { name: 'Members', description: 'Member management endpoints' },
             { name: 'Users', description: 'User management and accounts' },
-            { name: 'Auth', description: 'Authentication endpoints' }
+            { name: 'Auth', description: 'Authentication endpoints' },
+            { name: 'Roles', description: 'Role management endpoints' }
         ],
         servers: [
             {
@@ -74,6 +80,15 @@ const swaggerOptions = {
                         username: { type: "string" },
                         createdAt: { type: "string", format: "date-time" },
                         updatedAt: { type: "string", format: "date-time" }
+                    }
+                },
+                Role: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'string', format: 'uuid' },
+                        name: { type: 'string' },
+                        createdAt: { type: 'string', format: 'date-time' },
+                        updatedAt: { type: 'string', format: 'date-time' }
                     }
                 },
                 AuthResponse: {
@@ -130,14 +145,22 @@ app.use("/api/members", MemberController_1.MemberRouter);
 app.use("/api/users", UserController_1.UserRouter);
 // Auth routes
 app.use("/api/auth", AuthController_1.AuthRouter);
+// Role routes
+app.use("/api/roles", RoleController_1.RoleRouter);
 // Initialize database connection
 function startServer() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // Run all migration up functions
             console.log("Running migrations...");
-            yield (0, _1696600000000_CreateMembersTable_1.up)();
+            // Create users first, then roles, then add role_id to users, create user_roles, remove role_id (if desired), then members (members references users)
             yield (0, _1696700000000_CreateUsersTable_1.up)();
+            yield (0, _1696900000000_CreateRolesTable_1.up)();
+            yield (0, _1697000000000_AddRoleIdToUsers_1.up)();
+            yield (0, _1697100000000_CreateUserRolesTable_1.up)();
+            // New migration: remove role_id from users (drops FK and column)
+            yield (0, _1697200000000_RemoveRoleIdFromUsers_1.up)();
+            yield (0, _1696600000000_CreateMembersTable_1.up)();
             yield database_1.AppDataSource.initialize();
             console.log("Database connection initialized");
             const port = process.env.PORT || 3000;

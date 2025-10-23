@@ -92,6 +92,8 @@ function up() {
                 start_date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 end_date TIMESTAMP WITH TIME ZONE NOT NULL,
                 status member_status_enum NOT NULL DEFAULT 'ACTIVE',
+                -- link to the user who created/owns this member (optional)
+                created_by UUID NULL,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                 CONSTRAINT email_format CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'),
@@ -120,6 +122,19 @@ function up() {
                 BEFORE UPDATE ON members
                 FOR EACH ROW
                 EXECUTE FUNCTION update_updated_at_column();
+
+            -- foreign key linking to users (nullable), only if not already present
+            DO $$
+            BEGIN
+                IF EXISTS (
+                    SELECT 1 FROM information_schema.columns WHERE table_name='members' AND column_name='created_by'
+                ) AND NOT EXISTS (
+                    SELECT 1 FROM pg_constraint WHERE conname = 'fk_members_created_by_users'
+                ) THEN
+                    ALTER TABLE members
+                    ADD CONSTRAINT fk_members_created_by_users FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL;
+                END IF;
+            END$$;
         `);
             console.log('Migration up completed successfully');
         }
@@ -136,6 +151,9 @@ function down() {
             -- Drop triggers and functions
             DROP TRIGGER IF EXISTS update_members_updated_at ON members;
             DROP FUNCTION IF EXISTS update_updated_at_column();
+
+            -- Drop foreign key
+            ALTER TABLE IF EXISTS members DROP CONSTRAINT IF EXISTS fk_members_created_by_users;
 
             -- Drop table
             DROP TABLE IF EXISTS members;

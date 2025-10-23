@@ -88,6 +88,8 @@ function up() {
                 BEFORE UPDATE ON users
                 FOR EACH ROW
                 EXECUTE FUNCTION update_updated_at_column();
+
+            -- role constraint is handled by role table/foreign key in a separate migration
         `);
             console.log('Users migration up completed');
         }

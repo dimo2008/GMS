@@ -30,7 +30,6 @@ class UserRepository {
                 last_name,
                 email,
                 username,
-                role_id,
                 password_hash
             ) VALUES ($1, $2, $3, $4, $5)
             RETURNING *`;
@@ -39,24 +38,38 @@ class UserRepository {
                 user.lastName,
                 user.email,
                 user.username,
-                // roleId may be provided in the user object
-                user.roleId || null,
                 user.passwordHash
             ];
             const result = yield this.pool.query(query, values);
-            return this.mapRowToUser(result.rows[0]);
+            const createdUser = this.mapRowToUser(result.rows[0]);
+            // assign roles if provided
+            if (user.roles && user.roles.length > 0) {
+                for (const role of user.roles) {
+                    yield this.pool.query('INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', [createdUser.id, role.id]);
+                }
+            }
+            createdUser.roles = yield this.getUserRoles(createdUser.id);
+            return createdUser;
         });
     }
     findAll() {
         return __awaiter(this, void 0, void 0, function* () {
             const result = yield this.pool.query('SELECT * FROM users');
-            return result.rows.map(r => this.mapRowToUser(r));
+            const users = result.rows.map(r => this.mapRowToUser(r));
+            for (const user of users) {
+                user.roles = yield this.getUserRoles(user.id);
+            }
+            return users;
         });
     }
     findById(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const result = yield this.pool.query('SELECT * FROM users WHERE id = $1', [id]);
-            return result.rows.length ? this.mapRowToUser(result.rows[0]) : null;
+            if (!result.rows.length)
+                return null;
+            const user = this.mapRowToUser(result.rows[0]);
+            user.roles = yield this.getUserRoles(user.id);
+            return user;
         });
     }
     findByEmail(email) {
@@ -92,24 +105,30 @@ class UserRepository {
                 fields.push(`username = $${paramCount++}`);
                 values.push(user.username);
             }
-            if (user.roleId) {
-                fields.push(`role_id = $${paramCount++}`);
-                values.push(user.roleId);
-            }
             if (user.passwordHash) {
                 fields.push(`password_hash = $${paramCount++}`);
                 values.push(user.passwordHash);
             }
-            if (fields.length === 0)
-                return null;
-            values.push(id);
-            const query = `
-            UPDATE users
-            SET ${fields.join(', ')}
-            WHERE id = $${paramCount}
-            RETURNING *`;
-            const result = yield this.pool.query(query, values);
-            return result.rows.length ? this.mapRowToUser(result.rows[0]) : null;
+            if (fields.length > 0) {
+                values.push(id);
+                const query = `
+                UPDATE users
+                SET ${fields.join(', ')}
+                WHERE id = $${paramCount}
+                RETURNING *`;
+                yield this.pool.query(query, values);
+            }
+            // update roles if provided
+            if (user.roles) {
+                // remove all current roles
+                yield this.pool.query('DELETE FROM user_roles WHERE user_id = $1', [id]);
+                // add new roles
+                for (const role of user.roles) {
+                    yield this.pool.query('INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', [id, role.id]);
+                }
+            }
+            // return updated user
+            return yield this.findById(id);
         });
     }
     delete(id) {
@@ -124,11 +143,42 @@ class UserRepository {
         u.lastName = row.last_name;
         u.email = row.email;
         u.username = row.username;
-        u.roleId = row.role_id;
         u.passwordHash = row.password_hash;
         u.createdAt = row.created_at;
         u.updatedAt = row.updated_at;
+        // roles will be loaded separately
         return u;
+    }
+    getUserRoles(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = yield this.pool.query(`SELECT r.* FROM roles r
+             INNER JOIN user_roles ur ON ur.role_id = r.id
+             WHERE ur.user_id = $1`, [userId]);
+            return result.rows.map((row) => {
+                return {
+                    id: row.id,
+                    name: row.name,
+                    createdAt: row.created_at,
+                    updatedAt: row.updated_at
+                };
+            });
+        });
+    }
+    addRoleToUser(userId, roleId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.pool.query('INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', [userId, roleId]);
+        });
+    }
+    removeRoleFromUser(userId, roleId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.pool.query('DELETE FROM user_roles WHERE user_id = $1 AND role_id = $2', [userId, roleId]);
+        });
+    }
+    userHasRole(userId, roleId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = yield this.pool.query('SELECT 1 FROM user_roles WHERE user_id = $1 AND role_id = $2', [userId, roleId]);
+            return !!(result && result.rowCount && result.rowCount > 0);
+        });
     }
 }
 exports.UserRepository = UserRepository;

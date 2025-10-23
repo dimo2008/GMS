@@ -16,11 +16,14 @@ exports.MemberRouter = exports.MemberController = void 0;
 const express_1 = require("express");
 const MemberService_1 = require("../services/MemberService");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const UserService_1 = require("../services/UserService");
 // JWT auth middleware
 function jwtAuth(req, res, next) {
     const authHeader = req.headers["authorization"];
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({ message: "Missing or invalid Authorization header" });
+        return res
+            .status(401)
+            .json({ message: "Missing or invalid Authorization header" });
     }
     const token = authHeader.slice(7);
     try {
@@ -36,6 +39,7 @@ function jwtAuth(req, res, next) {
 class MemberController {
     constructor() {
         this.service = new MemberService_1.MemberService();
+        this.userService = new UserService_1.UserService();
     }
     /**
      * @swagger
@@ -59,6 +63,15 @@ class MemberController {
      */
     create(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            //check logged in user
+            //check if the user has role admin
+            const userId = req.user.sub;
+            const user = yield this.userService.getUserById(userId);
+            if (!user || !((_a = user.roles) === null || _a === void 0 ? void 0 : _a.some((r) => r.name === "admin"))) {
+                res.status(403).json({ message: "Unauthorized" });
+                return;
+            }
             try {
                 const member = yield this.service.createMember(req.body);
                 res.status(201).json(member);

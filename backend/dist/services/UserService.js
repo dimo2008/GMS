@@ -37,23 +37,37 @@ class UserService {
             // hash password (expect plain `password` in the request)
             const plainPassword = data.password;
             const hash = yield bcryptjs_1.default.hash(plainPassword, 10);
-            // handle role by name -> roleId
+            // handle roles: accept roles array or single role, default to receptionist
             const allowedRoles = ['admin', 'receptionist'];
-            const roleName = data.role ? String(data.role) : 'receptionist';
-            if (!allowedRoles.includes(roleName))
-                throw new Error(`Invalid role. Allowed: ${allowedRoles.join(', ')}`);
-            // find or create role record
-            let roleRecord = yield this.roleRepo.findByName(roleName);
-            if (!roleRecord) {
-                roleRecord = yield this.roleRepo.create({ name: roleName });
+            let roleNames = [];
+            if (Array.isArray(data.roles) && data.roles.length > 0) {
+                roleNames = data.roles;
+            }
+            else if (data.role) {
+                roleNames = [String(data.role)];
+            }
+            else {
+                roleNames = ['receptionist']; // default if nothing provided
+            }
+            for (const name of roleNames) {
+                if (!allowedRoles.includes(name))
+                    throw new Error(`Invalid role: ${name}. Allowed: ${allowedRoles.join(', ')}`);
+            }
+            // find or create all roles
+            const roles = [];
+            for (const name of roleNames) {
+                let role = yield this.roleRepo.findByName(name);
+                if (!role)
+                    role = yield this.roleRepo.create({ name });
+                roles.push(role);
             }
             const toCreate = {
                 firstName: data.firstName,
                 lastName: data.lastName,
                 email: data.email,
                 username: data.username,
-                roleId: roleRecord.id,
-                passwordHash: hash
+                passwordHash: hash,
+                roles
             };
             return yield this.repository.create(toCreate);
         });
@@ -92,16 +106,32 @@ class UserService {
                 data.passwordHash = yield bcryptjs_1.default.hash(data.password, 10);
                 delete data.password;
             }
-            // if role provided, validate and translate to roleId
-            if (data.role) {
-                const roleNameUpdate = String(data.role);
-                const allowedRolesUpdate = ['admin', 'receptionist'];
-                if (!allowedRolesUpdate.includes(roleNameUpdate))
-                    throw new Error(`Invalid role. Allowed: ${allowedRolesUpdate.join(', ')}`);
-                let rr = yield this.roleRepo.findByName(roleNameUpdate);
-                if (!rr)
-                    rr = yield this.roleRepo.create({ name: roleNameUpdate });
-                data.roleId = rr.id;
+            // handle roles: accept roles array or single role, default to receptionist if not provided
+            const allowedRoles = ['admin', 'receptionist'];
+            let roleNames = undefined;
+            if (Array.isArray(data.roles) && data.roles.length > 0) {
+                roleNames = data.roles;
+            }
+            else if (data.role) {
+                roleNames = [String(data.role)];
+            }
+            if (!roleNames || roleNames.length === 0) {
+                roleNames = ['receptionist']; // default if nothing provided
+            }
+            if (roleNames) {
+                for (const name of roleNames) {
+                    if (!allowedRoles.includes(name))
+                        throw new Error(`Invalid role: ${name}. Allowed: ${allowedRoles.join(', ')}`);
+                }
+                // find or create all roles
+                const roles = [];
+                for (const name of roleNames) {
+                    let role = yield this.roleRepo.findByName(name);
+                    if (!role)
+                        role = yield this.roleRepo.create({ name });
+                    roles.push(role);
+                }
+                data.roles = roles;
                 delete data.role;
             }
             return yield this.repository.update(id, data);
@@ -111,10 +141,83 @@ class UserService {
         return __awaiter(this, void 0, void 0, function* () {
             if (!id)
                 throw new Error('User id is required');
-            const u = yield this.repository.findById(id);
-            if (!u)
+            const user = yield this.repository.findById(id);
+            if (!user)
                 throw new Error('User not found');
             yield this.repository.delete(id);
+        });
+    }
+    assignRolesToUser(userId, roleNames) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!userId)
+                throw new Error('User id is required');
+            if (!Array.isArray(roleNames) || roleNames.length === 0)
+                throw new Error('At least one role is required');
+            const allowedRoles = ['admin', 'receptionist'];
+            for (const name of roleNames) {
+                if (!allowedRoles.includes(name))
+                    throw new Error(`Invalid role: ${name}. Allowed: ${allowedRoles.join(', ')}`);
+            }
+            const user = yield this.repository.findById(userId);
+            if (!user)
+                throw new Error('User not found');
+            // find or create all roles
+            const roles = [];
+            for (const name of roleNames) {
+                let role = yield this.roleRepo.findByName(name);
+                if (!role)
+                    role = yield this.roleRepo.create({ name });
+                roles.push(role);
+            }
+            // update user roles
+            return yield this.repository.update(userId, { roles });
+        });
+    }
+    grantRoleToUser(userId, roleName) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!userId)
+                throw new Error('User id is required');
+            if (!roleName)
+                throw new Error('Role name is required');
+            const user = yield this.repository.findById(userId);
+            if (!user)
+                throw new Error('User not found');
+            let role = yield this.roleRepo.findByName(roleName);
+            if (!role)
+                role = yield this.roleRepo.create({ name: roleName });
+            yield this.repository.addRoleToUser(userId, role.id);
+            return yield this.repository.findById(userId);
+        });
+    }
+    revokeRoleFromUser(userId, roleName) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!userId)
+                throw new Error('User id is required');
+            if (!roleName)
+                throw new Error('Role name is required');
+            const user = yield this.repository.findById(userId);
+            if (!user)
+                throw new Error('User not found');
+            const role = yield this.roleRepo.findByName(roleName);
+            if (!role)
+                throw new Error('Role not found');
+            yield this.repository.removeRoleFromUser(userId, role.id);
+            return yield this.repository.findById(userId);
+        });
+    }
+    userHasRole(userId, roleName) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!userId)
+                throw new Error('User id is required');
+            if (!roleName)
+                throw new Error('Role name is required');
+            const user = yield this.repository.findById(userId);
+            if (!user)
+                throw new Error('User not found');
+            const role = yield this.roleRepo.findByName(roleName);
+            if (!role)
+                return false;
+            return yield this.repository.userHasRole(userId, role.id);
         });
     }
 }

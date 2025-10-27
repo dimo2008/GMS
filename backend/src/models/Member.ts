@@ -12,5 +12,5 @@ export class Member {
     endDate!: Date;
     status!: MemberStatus;
     createdAt?: Date;
-    updatedAt?: Date;
+    updatedAt?: Date; //comment
 }

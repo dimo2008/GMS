@@ -4,11 +4,13 @@ import { BrowserModule, provideClientHydration, withEventReplay } from '@angular
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
 import { Member } from './member/member';
+import { Team } from './team/team';
 
 @NgModule({
   declarations: [
     App,
-    Member
+    Member,
+    Team
   ],
   imports: [
     BrowserModule,

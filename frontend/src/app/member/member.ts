@@ -14,10 +14,16 @@ export class Member implements OnInit {
   address: string = '';
   hobbies: string[] = [];
   gender: string = '';
+  age: number = 0;
 
   constructor() {}
 
-  ngOnInit(): void {
+  ngOnInit(): void {  }
 
+  AddAge(member:Member): void {
+    member.age += 1;
+  }
+  subtractAge(member:Member): void {
+    member.age -= 1;
   }
 }

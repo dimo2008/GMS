@@ -3,12 +3,17 @@
   <p><strong>Email:</strong> {{ member.email }}</p>
   <p><strong>Phone:</strong> {{ member.phone }}</p>
   <p><strong>Address:</strong> {{ member.address }}</p>
+  <p><strong>Age:</strong> {{ member.age }}</p>
+  <button (click)="AddAge(member)">Increase Age</button>
+  <button (click)="subtractAge(member)">Decrease Age</button>
+
   <p><strong>Hobbies:</strong></p>
-<ul>
-    <li *ngFor="let hobby of member.hobbies" [ngStyle]="{'color': hobby === 'Reading' ? 'blue' : 'red' }">
-        {{ hobby }}
+  <ul>
+    <li
+      *ngFor="let hobby of member.hobbies"
+      [ngStyle]="{ color: hobby === 'Reading' ? 'blue' : 'red' }"
+    >
+      {{ hobby }}
     </li>
-</ul>
-
+  </ul>
 </div>
-

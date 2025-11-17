@@ -17,6 +17,7 @@ export class Team implements OnInit {
         address: 'Cairo, Egypt',
         hobbies: ['Reading', 'Traveling', 'Coding'],
         gender: 'Male',
+        age: 30
       },
       {
         name: 'Sara Ali',
@@ -25,6 +26,7 @@ export class Team implements OnInit {
         address: 'Alexandria, Egypt',
         hobbies: ['Painting', 'Cooking', 'Dancing'],
         gender: 'Female',
+        age: 28
       },
       {
         name: 'Mona Ashraf',
@@ -33,6 +35,7 @@ export class Team implements OnInit {
         address: 'Cairo, Egypt',
         hobbies: ['Reading', 'Traveling', 'Coding'],
         gender: 'Male',
+        age: 35
       },
     ];
   }

@@ -1,1 +1,17 @@
-<p>member works!</p>
+<h1 >Member Information</h1>
+<div>
+<img *ngIf="gender === 'Male'" src="/frontend/src/assets/Images/male.png" >
+<img *ngIf="gender === 'Female'" src="/frontend/src/assets/Images/female.png">
+
+  <p><strong>Name:</strong> {{ name }}</p>
+  <p><strong>Email:</strong> {{ email }}</p>
+  <p><strong>Phone:</strong> {{ phone }}</p>
+  <p><strong>Address:</strong> {{ address }}</p>
+  <p><strong>Hobbies:</strong></p>
+<ul>
+    <li *ngFor="let hobby of hobbies" [ngStyle]="{'color': hobby === 'Reading' ? 'blue' : 'red' }">
+        {{ hobby }}
+    </li>
+</ul>
+
+</div>

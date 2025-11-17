@@ -1,2 +1,13 @@
-<h1>List of Members</h1>
-<app-member *ngFor="let member of teamMembers" [member]="member"></app-member>
+<h1 class="mb-4">List of Members</h1>
+<div class="container">
+  <div class="row g-4">
+    <div class="col-md-4" *ngFor="let member of teamMembers">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <app-member [member]="member"></app-member>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

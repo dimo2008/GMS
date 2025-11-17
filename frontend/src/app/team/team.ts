@@ -8,6 +8,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class Team implements OnInit {
   teamMembers: object[] = [];
+  totalSalaries: number = 0;
   ngOnInit(): void {
     this.teamMembers = [
       {
@@ -17,7 +18,7 @@ export class Team implements OnInit {
         address: 'Cairo, Egypt',
         hobbies: ['Reading', 'Traveling', 'Coding'],
         gender: 'Male',
-        age: 30
+        salary: 30,
       },
       {
         name: 'Sara Ali',
@@ -26,7 +27,7 @@ export class Team implements OnInit {
         address: 'Alexandria, Egypt',
         hobbies: ['Painting', 'Cooking', 'Dancing'],
         gender: 'Female',
-        age: 28
+        salary: 28,
       },
       {
         name: 'Mona Ashraf',
@@ -35,12 +36,12 @@ export class Team implements OnInit {
         address: 'Cairo, Egypt',
         hobbies: ['Reading', 'Traveling', 'Coding'],
         gender: 'Male',
-        age: 35
+        salary: 35,
       },
     ];
   }
 
-  onLike(member: any): void {
-    window.alert(`Liked member: ${member.name}`);
+  onSalaryChange(member: any): void {
+    this.totalSalaries += member.salary;
   }
 }

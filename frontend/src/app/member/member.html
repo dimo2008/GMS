@@ -3,9 +3,19 @@
   <p><strong>Email:</strong> {{ member.email }}</p>
   <p><strong>Phone:</strong> {{ member.phone }}</p>
   <p><strong>Address:</strong> {{ member.address }}</p>
-  <p><strong>Age:</strong> {{ member.age }}</p>
-  <button (click)="AddAge(member)">Increase Age</button>
-  <button (click)="subtractAge(member)">Decrease Age</button>
+  <p><strong>Salary:</strong> {{ member.salary }}</p>
+  <div class="row col-12 mb-3">
+    <div class="col-6">
+      <button type="button" class="btn btn-primary" (click)="AddSalary(member)">
+        Increase Salary
+      </button>
+    </div>
+    <div class="col-6">
+      <button TYPE="button" class="btn btn-danger" (click)="subtractSalary(member)">
+        Decrease Salary
+      </button>
+    </div>
+  </div>
 
   <p><strong>Hobbies:</strong></p>
   <ul>
@@ -16,5 +26,5 @@
       {{ hobby }}
     </li>
   </ul>
-  <button (click)="like.emit(member)">Like</button>
+  <button (click)="onSalaryChange.emit(member)">Update Total Salaries</button>
 </div>

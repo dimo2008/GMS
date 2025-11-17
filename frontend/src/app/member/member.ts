@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, output } from '@angular/core';
 
 @Component({
   selector: 'app-member',
@@ -7,7 +7,9 @@ import { Component, Input, OnInit } from '@angular/core';
   styleUrl: './member.css',
 })
 export class Member implements OnInit {
-   @Input() member: any;
+  @Input() member: any;
+  @Output() like = new EventEmitter();
+
   name: string = '';
   phone: string = '';
   email: string = '';
@@ -18,12 +20,12 @@ export class Member implements OnInit {
 
   constructor() {}
 
-  ngOnInit(): void {  }
+  ngOnInit(): void {}
 
-  AddAge(member:Member): void {
+  AddAge(member: Member): void {
     member.age += 1;
   }
-  subtractAge(member:Member): void {
+  subtractAge(member: Member): void {
     member.age -= 1;
   }
 }

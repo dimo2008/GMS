@@ -4,7 +4,7 @@
     <div class="col-md-4" *ngFor="let member of teamMembers">
       <div class="card h-100 shadow-sm">
         <div class="card-body">
-          <app-member [member]="member"></app-member>
+          <app-member [member]="member" (like)="onLike($event)"></app-member>
         </div>
       </div>
     </div>

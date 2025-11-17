@@ -39,4 +39,8 @@ export class Team implements OnInit {
       },
     ];
   }
+
+  onLike(member: any): void {
+    window.alert(`Liked member: ${member.name}`);
+  }
 }

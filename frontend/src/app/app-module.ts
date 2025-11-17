@@ -8,7 +8,7 @@ import { Team } from './team/team';
 import { Sidebar } from './sidebar/sidebar';
 import { Dashboard } from './dashboard/dashboard';
 import { About } from './about/about';
-
+import { FormsModule } from '@angular/forms';
 @NgModule({
   declarations: [
     App,
@@ -20,7 +20,8 @@ import { About } from './about/about';
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    FormsModule
   ],
   providers: [
     provideBrowserGlobalErrorListeners(),

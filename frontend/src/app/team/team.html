@@ -1,17 +1,28 @@
 <h1 class="mb-4">List of Members</h1>
-<div class="container">
-  <div class="row g-4">
-    <div class="col-md-4" *ngFor="let member of teamMembers">
-      <div class="card h-100 shadow-sm">
-        <div class="card-body">
-          <app-member [member]="member" (onSalaryChange)="onSalaryChange($event)"></app-member>
+
+<div class="mb-4">
+  <div class="input-group">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Search by phone number"
+      [(ngModel)]="phone"
+    />
+    <button class="btn btn-primary" (click)="onSearch()">Search</button>
+  </div>
+
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-md-4" *ngFor="let member of teamMembers">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <app-member [member]="member" (onSalaryChange)="onSalaryChange($event)"></app-member>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-
     <div class="mt-4">
-        <h3>Total Salaries: {{ totalSalaries }}</h3>
+      <h3>Total Salaries: {{ totalSalaries }}</h3>
     </div>
+  </div>
 </div>
-

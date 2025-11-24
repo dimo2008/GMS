@@ -9,6 +9,7 @@ export class MemberService {
     }
 //createMember 3
     async createMember(memberData: Partial<Member>): Promise<Member> {
+        console.log(memberData);
         // Validate required fields
         if (!memberData.firstName || !memberData.lastName || !memberData.email) {
             throw new Error('First name, last name, and email are required');

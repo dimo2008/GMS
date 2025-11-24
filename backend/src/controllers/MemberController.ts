@@ -63,6 +63,8 @@ export class MemberController {
     // }
 
     try {
+      console.log(req.body);
+
       const member = await this.service.createMember(req.body);
       res.status(201).json(member);
     } catch (error) {

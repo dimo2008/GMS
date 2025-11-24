@@ -10,8 +10,9 @@ import { Dashboard } from './dashboard/dashboard';
 import { About } from './about/about';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
+import { AddMember } from './add-member/add-member';
 @NgModule({
-  declarations: [App, Member, Team, Sidebar, Dashboard, About],
+  declarations: [App, Member, Team, Sidebar, Dashboard, About, AddMember],
   imports: [BrowserModule, AppRoutingModule, FormsModule, HttpClientModule],
   providers: [provideBrowserGlobalErrorListeners(), provideClientHydration(withEventReplay())],
   bootstrap: [App],

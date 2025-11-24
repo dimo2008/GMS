@@ -1,0 +1,27 @@
+<h1 class="mb-4">List of Members</h1>
+<div>
+  <app-add-member></app-add-member>
+</div>
+<div class="mb-4">
+  <div class="input-group">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Search by id"
+      [(ngModel)]="id"
+    />
+    <button class="btn btn-primary" (click)="onSearch()">Search</button>
+  </div>
+
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-md-4" *ngFor="let member of teamMembers | async">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <app-member [member]="member"></app-member>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

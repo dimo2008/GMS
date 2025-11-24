@@ -1,0 +1,35 @@
+<form #form ="ngForm" (ngSubmit)="form.valid && onAddMember()">
+    <div class="mb-3">
+        <label for="memberName" class="form-label">Member First Name</label>
+        <input type="text" class="form-control" id="memberName" [(ngModel)]="firstName" name="memberName" required />
+    </div>
+    <div class="mb-3">
+        <label for="memberLastName" class="form-label">Member Last Name</label>
+        <input type="text" class="form-control" id="memberLastName" [(ngModel)]="lastName" name="memberLastName" required />
+    </div>
+    <div class="mb-3">
+        <label for="memberEmail" class="form-label">Member Email</label>
+        <input type="email" class="form-control" id="memberEmail" [(ngModel)]="email" name="memberEmail" required />
+    </div>
+    <div class="mb-3">
+        <label for="memberPhone" class="form-label">Member Phone</label>
+        <input type="text" class="form-control" id="memberPhone" [(ngModel)]="phone" name="memberPhone" required />
+    </div>
+    <div class="mb-3">
+        <label for="membershipType" class="form-label">Membership Type</label>
+        <input type="text" class="form-control" id="membershipType" [(ngModel)]="membershipType" name="membershipType" required />
+    </div>  
+    <div class="mb-3">
+        <label for="startDate" class="form-label">Start Date</label>
+        <input type="date" class="form-control" id="startDate" [(ngModel)]="startDate" name="startDate" required />
+    </div>
+    <div class="mb-3">
+        <label for="endDate" class="form-label">End Date</label>
+        <input type="date" class="form-control" id="endDate" [(ngModel)]="endDate" name="endDate" required />
+    </div>  
+    <div class="mb-3">
+        <label for="status" class="form-label">Status</label>
+        <input type="text" class="form-control" id="status" [(ngModel)]="status" name="status" required />
+    </div>
+    <button type="submit" class="btn btn-success" [disabled]="!form.valid">Add Member</button>
+</form>

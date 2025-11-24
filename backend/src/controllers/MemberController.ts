@@ -1,5 +1,6 @@
 import { Request, Response, Router, NextFunction } from "express";
 import { MemberService } from "../services/MemberService";
+import { Member } from "../models/Member";
 import jwt from "jsonwebtoken";
 import { UserService } from "../services/UserService";
 
@@ -53,13 +54,13 @@ export class MemberController {
   async create(req: Request, res: Response): Promise<void> {
     //check logged in user
     //check if the user has role admin
-    const userId = (req as any).user.sub;
+    // const userId = (req as any).user.sub;
 
-    const user = await this.userService.getUserById(userId);
-    if (!user || !user.roles?.some((r) => r.name === "admin")) {
-      res.status(403).json({ message: "Unauthorized" });
-      return;
-    }
+    // const user = await this.userService.getUserById(userId);
+    // if (!user || !user.roles?.some((r) => r.name === "admin")) {
+    //   res.status(403).json({ message: "Unauthorized" });
+    //   return;
+    // }
 
     try {
       const member = await this.service.createMember(req.body);
@@ -87,8 +88,16 @@ export class MemberController {
    */
   async getAll(req: Request, res: Response): Promise<void> {
     try {
-      const members = await this.service.getAllMembers();
-      res.json(members);
+      console.log(req.query.id);
+      const id = (req.query.id as string) ?? "";
+      if (!id) {
+        const members = await this.service.getAllMembers();
+        res.json(members);
+      } else {
+        const member = await this.service.getMemberById(id);
+        const members: Member[] = member ? [member] : [];
+        res.json(members);
+      }
     } catch (error) {
       res.status(500).json({ message: "Error retrieving members", error });
     }
@@ -204,7 +213,7 @@ export const MemberRouter = (() => {
   const router = Router();
 
   // Require JWT for creating a member
-  router.post("/", jwtAuth, (req, res) => controller.create(req, res));
+  router.post("/", (req, res) => controller.create(req, res));
   router.get("/", (req, res) => controller.getAll(req, res));
   router.get("/:id", (req, res) => controller.getById(req, res));
   router.put("/:id", (req, res) => controller.update(req, res));

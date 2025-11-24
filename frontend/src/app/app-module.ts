@@ -9,24 +9,11 @@ import { Sidebar } from './sidebar/sidebar';
 import { Dashboard } from './dashboard/dashboard';
 import { About } from './about/about';
 import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 @NgModule({
-  declarations: [
-    App,
-    Member,
-    Team,
-    Sidebar,
-    Dashboard,
-    About
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    FormsModule
-  ],
-  providers: [
-    provideBrowserGlobalErrorListeners(),
-    provideClientHydration(withEventReplay())
-  ],
-  bootstrap: [App]
+  declarations: [App, Member, Team, Sidebar, Dashboard, About],
+  imports: [BrowserModule, AppRoutingModule, FormsModule, HttpClientModule],
+  providers: [provideBrowserGlobalErrorListeners(), provideClientHydration(withEventReplay())],
+  bootstrap: [App],
 })
-export class AppModule { }
+export class AppModule {}

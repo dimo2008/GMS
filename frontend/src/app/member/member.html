@@ -1,30 +1,11 @@
 <div class="col-4">
-  <p><strong>Name:</strong> {{ member.name }}</p>
-  <p><strong>Email:</strong> {{ member.email }}</p>
-  <p><strong>Phone:</strong> {{ member.phone }}</p>
-  <p><strong>Address:</strong> {{ member.address }}</p>
-  <p><strong>Salary:</strong> {{ member.salary }}</p>
-  <div class="row col-12 mb-3">
-    <div class="col-6">
-      <button type="button" class="btn btn-primary" (click)="AddSalary(member)">
-        Increase Salary
-      </button>
-    </div>
-    <div class="col-6">
-      <button TYPE="button" class="btn btn-danger" (click)="subtractSalary(member)">
-        Decrease Salary
-      </button>
-    </div>
-  </div>
-
-  <p><strong>Hobbies:</strong></p>
-  <ul>
-    <li
-      *ngFor="let hobby of member.hobbies"
-      [ngStyle]="{ color: hobby === 'Reading' ? 'blue' : 'red' }"
-    >
-      {{ hobby }}
-    </li>
-  </ul>
-  <button (click)="onSalaryChange.emit(member)">Update Total Salaries</button>
+    <p><strong>Member ID:</strong>{{member.id}}</p>
+    <p><strong>First Name:</strong>{{member.firstName}}</p>
+    <p><strong>Last Name:</strong>{{member.lastName}}</p>
+    <p><strong>Email:</strong>{{member.email}}</p>
+    <p><strong>Phone:</strong>{{member.phone}}</p>
+    <p><strong>Membership Type:</strong>{{member.membershipType}}</p>
+    <p><strong>Start Date:</strong>{{member.startDate}}</p>
+    <p><strong>End Date:</strong>{{member.endDate}}</p>
+    <p><strong>Status:</strong>{{member.status}}</p>
 </div>

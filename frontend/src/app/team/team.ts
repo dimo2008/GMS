@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MemberService } from '../Services/member-service';
+import { Observable } from 'rxjs/internal/Observable';
 
 @Component({
   selector: 'app-team',
@@ -10,20 +11,16 @@ import { MemberService } from '../Services/member-service';
 export class Team implements OnInit {
   constructor(private memberService: MemberService) {}
 
-  teamMembers: object[] = [];
+  teamMembers: Observable<object[]> = new Observable<object[]>();
   totalSalaries: number = 0;
-  phone: string = '';
+  id: string = '';
 
 
   ngOnInit(): void {
     this.teamMembers = this.memberService.GetMembers('');
   }
 
-  onSalaryChange(member: any): void {
-    this.totalSalaries += member.salary;
-  }
-
   onSearch(): void {
-    this.teamMembers = this.memberService.GetMembers(this.phone);
+    this.teamMembers = this.memberService.GetMembers(this.id);
   }
 }

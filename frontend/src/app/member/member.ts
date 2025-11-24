@@ -8,24 +8,18 @@ import { Component, EventEmitter, Input, OnInit, Output, output } from '@angular
 })
 export class Member implements OnInit {
   @Input() member: any;
-  @Output() onSalaryChange = new EventEmitter();
 
-  name: string = '';
-  phone: string = '';
+  id: string = '';
+  firstName: string = '';
+  lastName: string = '';
   email: string = '';
-  address: string = '';
-  hobbies: string[] = [];
-  gender: string = '';
-  salary: number = 0;
+  phone: string = '';
+  membershipType: string = '';
+  startDate: string = '';
+  endDate: Date = new Date();
+  status: string = '';
 
   constructor() {}
 
   ngOnInit(): void {}
-
-  AddSalary(member: Member): void {
-    member.salary += 1;
-  }
-  subtractSalary(member: Member): void {
-    member.salary -= 1;
-  }
 }
